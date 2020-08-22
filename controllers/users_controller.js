@@ -1,8 +1,12 @@
 const User = require('../models/user');
 
 module.exports.profile = function(req, res){
-    return res.render('users', {
-        title: 'Users',
+    User.findById(req.params.id, function(err, user){
+        if (err){console.log("There's an error fetching Friend's Profile"); return;}
+        return res.render('users', {
+            title: 'Users',
+            user_profile: user,
+        })
     })
 }
 

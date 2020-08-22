@@ -1,4 +1,5 @@
 const Post = require('../models/post');
+const User = require('../models/user');
 module.exports.home = function(req, res){
     // console.log(req.cookies)
     // res.cookie('user_id', 25);
@@ -20,10 +21,15 @@ module.exports.home = function(req, res){
     })
     .exec(function(err, posts){
         if (err){console.log("There's an error while fetching the Posts."); return;}
-        return res.render('home', {
-            title: 'Home',
-            posts: posts
+        User.find({}, function(err, users){
+            if (err){console.log("There's an error while fetching the Posts."); return;}
+            return res.render('home', {
+                title: 'Home',
+                posts: posts,
+                all_users: users,
+            })
         })
+        
     })
 }
 
