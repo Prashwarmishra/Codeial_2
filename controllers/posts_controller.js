@@ -17,10 +17,12 @@ module.exports.create = async function(req, res){
             content: req.body.content,
             user: req.user._id
         })
+        req.flash('success', "Post Published!!");
         return res.redirect('back');
     }
     catch(err){
-        console.log("There's an error creating the Post"); return;
+        req.flash('error', 'Error while creating the Account');
+        return;
     }
 }
 // module.exports.destroy = function(req, res){
@@ -50,13 +52,16 @@ module.exports.destroy = async function(req, res){
         let post = await Post.findById(req.params.id)
         if (post.user == req.user.id){
             post.remove();
-            await Comment.deleteMany({post: req.params.id})
+            await Comment.deleteMany({post: req.params.id});
+            req.flash('success', "Post deleted Successfully.");
             return res.redirect('back');
         }
         else{
+            req.flash("error", "Invalid request, unauthorized to delete the Post.")
             return res.redirect('back');
         }
     }catch(err){
+        req.flash("error", "Error deleting the Post.")
         console.log("Error deleting the Post."); 
         return;
     }
