@@ -32,12 +32,21 @@ module.exports.create = async function(req, res){
             })
             post.comments.push(comment);
             post.save();
+            
+            if (req.xhr){
+                return res.status(200).json({
+                    data: {
+                        comment: comment,
+                    }, message : 'Comment Created.'
+                })
+            }
+
             req.flash("success", "Comment added.")
             return res.redirect('back');
         }
     }catch(err){
         req.flash("error", "Error adding the Comment on the Post.");
-        return;
+        return res.redirect('back');
     }
 };
 
@@ -58,15 +67,27 @@ module.exports.create = async function(req, res){
 //     })
 // }
 module.exports.destroy = async function(req, res){
-    let comment = await Comment.findById(req.params.id);
-    if (comment.user == req.user.id){
-        let postId = comment.post;
-        comment.remove();
-        await Post.findByIdAndUpdate(postId, {$pull : {comments: req.params.id}});
-        req.flash("success", "Comment deleted.");
-        return res.redirect('back');
-    }else{
-        req.flash("error", "Error Deleting the Comment.");
-        return res.redirect('/');
-    }
+    try{
+        let comment = await Comment.findById(req.params.id);
+        if (comment.user == req.user.id){
+            let postId = comment.post;
+            comment.remove();
+            await Post.findByIdAndUpdate(postId, {$pull : {comments: req.params.id}});
+            if (req.xhr){
+                return res.status(200).json({
+                    data: {
+                        comment_id: req.params.id
+                    }, message: 'Comment Deleted.'
+                })
+            }
+            req.flash("success", "Comment deleted.");
+            return res.redirect('back');
+            }else{
+                req.flash("error", "Error Deleting the Comment.");
+                return res.redirect('back');
+            }
+        }catch(err){
+            console.log('error: ', err);
+            return;
+        }
 }
