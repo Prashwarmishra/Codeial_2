@@ -1,6 +1,8 @@
 const Post = require('../models/post');
 const Comment = require('../models/comment');
 const commentMailer = require('../mailer/comment_mailer');
+const queue = require('../config/kue');
+const commentEmailWorker = require('../workers/comment_email_worker');
 const { post } = require('../routes/posts');
 
 // module.exports.create = function(req, res){
@@ -34,7 +36,12 @@ module.exports.create = async function(req, res){
             post.comments.push(comment);
             post.save();
             comment = await comment.populate("user", "name email").execPopulate();
-            commentMailer.newComment(comment);
+            //commentMailer.newComment(comment);
+            let job = queue.create('emails', comment).save(function(err){
+                if (err){console.log("Error in implementing Kue-comment-worker: ", err); return;}
+
+                console.log("Email comment currently being processed ...", job.id);
+            });
             if (req.xhr){
                 return res.status(200).json({
                     data: {
