@@ -1,13 +1,12 @@
 const nodemailer = require("../config/nodemailer");
 
 exports.newComment = (comment) => {
-    console.log("Hello the contents of the mail are: ", comment)
-
+    let HTMLstring = nodemailer.renderTemplate({comment:comment}, '/comments/new_comment.ejs');
     nodemailer.transporter.sendMail({
         from: "admin@codeial.com",
         to: comment.user.email,
         subject: "Comment Added",
-        html: "<h4>Yup, your comment is added.</h4>"
+        html: HTMLstring
     }, (err, info) => {
         if (err){
             console.log("Error in sending mail: ", err);
