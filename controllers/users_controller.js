@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const fs = require('fs');
 const path = require("path");
+const ForgotPassword = require("../models/forget_password");
+const { db } = require('../models/user');
 
 module.exports.profile = function(req, res){
     User.findById(req.params.id, function(err, user){
@@ -113,4 +115,54 @@ module.exports.destroySession = function(req, res){
     req.logout();
     req.flash("success", "Successfully Logged off.");
     return res.redirect('/');
+}
+
+module.exports.forgetPassword = function(req, res){
+    return res.render('forgot_password', {
+        title: "Forget Password",
+    });
+}
+
+module.exports.recoveryEmail = function(req, res){
+    User.findOne({email: req.body.recovery_email}, function(err, user){
+        if (err){console.log("Error finding user while changing password"); return;}
+        if (!user){
+            console.log("The account by this email does not exist.");
+            return res.redirect("back");
+        }
+        if (user){
+            console.log("Redirecting you to password changing page.");
+            return res.redirect("/users/reset-password");
+
+        }
+    })
+}
+
+module.exports.resetPassword = function(req, res){
+    return res.render("reset_password", {
+        title: "Reset Password"
+    });
+}
+
+module.exports.changedPassword = async function(req, res){
+    if (req.body.new_password != req.body.confirm_new_password){
+        console.log("Password does not match with confirm password, try again");
+        return res.redirect('back');
+    }
+    else{
+        let user = await User.findOne({email: req.body.recovery_email});
+        user.password = req.body.new_password;
+        user.save();
+        return res.redirect('/users/sign-in');
+    }
+
+
+}
+
+module.exports.index = async function(req, res){
+    let user = await User.find({})
+    return res.json(200, {
+        message: "User Credentials",
+        user: user,
+    })
 }
