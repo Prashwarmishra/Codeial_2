@@ -131,7 +131,7 @@ module.exports.recoveryEmail = function(req, res){
             return res.redirect("back");
         }
         if (user){
-            console.log("Redirecting you to password changing page.");
+            console.log("Redirecting you to the password changing page.");
             return res.redirect("/users/reset-password");
 
         }
@@ -159,10 +159,3 @@ module.exports.changedPassword = async function(req, res){
 
 }
 
-module.exports.index = async function(req, res){
-    let user = await User.find({})
-    return res.json(200, {
-        message: "User Credentials",
-        user: user,
-    })
-}

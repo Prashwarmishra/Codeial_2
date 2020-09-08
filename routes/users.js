@@ -26,6 +26,6 @@ router.post('/recovery-email', usersController.recoveryEmail);
 router.get('/reset-password', usersController.resetPassword);
 router.post('/changed-password', usersController.changedPassword);
 
-router.get('/', usersController.index);
+
 
 module.exports = router;
